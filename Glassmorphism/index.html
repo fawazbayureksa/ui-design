@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Control Center — Glass UI</title>
+<style>
+  :root{
+    --bg:#F3F0E8;
+    --ink:#111111;
+    --glass:rgba(255,255,255,.5);
+    --blue:#3949AB;
+    --red:#E53935;
+    --teal:#00897B;
+    --orange:#F9A825;
+    --purple:#45428C;
+    --hl:rgba(255,255,255,.8);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    color:var(--ink);
+    background:var(--bg);
+    display:flex;justify-content:center;align-items:flex-start;
+    min-height:100vh;padding:40px 16px;
+    background-image:
+      radial-gradient(900px 500px at 12% 8%, rgba(255,255,255,.85), transparent 60%),
+      radial-gradient(700px 500px at 88% 20%, rgba(249,168,37,.12), transparent 55%),
+      radial-gradient(800px 600px at 50% 90%, rgba(0,137,123,.08), transparent 60%);
+  }
+
+  .glass{
+    position:relative;
+    background:linear-gradient(145deg, rgba(255,255,255,.65), rgba(255,255,255,.35));
+    border:1px solid rgba(255,255,255,.65);
+    border-radius:28px;
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    box-shadow:
+      inset 0 1px 0 var(--hl),
+      inset 0 -2px 6px rgba(255,255,255,.5),
+      inset 2px 0 8px rgba(255,255,255,.3),
+      inset -2px 0 8px rgba(255,255,255,.3),
+      0 10px 24px rgba(60,50,20,.14),
+      0 3px 8px rgba(60,50,20,.08);
+  }
+  .glass::after{ /* diagonal reflection streak */
+    content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+    background:linear-gradient(115deg, transparent 30%, rgba(255,255,255,.35) 46%, transparent 60%);
+    opacity:.8;
+  }
+
+  .dashboard{max-width:900px;width:100%;padding:34px 38px;display:flex;flex-direction:column;gap:28px}
+
+  /* ---- Header ---- */
+  .header{display:flex;align-items:center;justify-content:space-between}
+  .header .titles h1{font-size:1.55rem;font-weight:800;letter-spacing:-.02em}
+  .header .titles p{font-size:.85rem;font-weight:600;opacity:.55;margin-top:2px}
+
+  .icon-btn{
+    width:52px;height:52px;border-radius:18px;cursor:pointer;border:1px solid rgba(255,255,255,.65);
+    background:linear-gradient(145deg, rgba(255,255,255,.7), rgba(255,255,255,.35));
+    box-shadow:inset 0 1px 0 var(--hl), inset 0 -2px 5px rgba(255,255,255,.4), 0 6px 14px rgba(60,50,20,.12);
+    display:flex;align-items:center;justify-content:center;
+    transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .icon-btn:hover{transform:translateY(-4px) scale(1.06);box-shadow:inset 0 1px 0 var(--hl), inset 0 -2px 5px rgba(255,255,255,.4), 0 12px 20px rgba(60,50,20,.16)}
+  .icon-btn:active{transform:translateY(2px) scale(.96);box-shadow:inset 0 3px 8px rgba(0,0,0,.14), 0 2px 4px rgba(60,50,20,.1)}
+  .icon-btn svg{width:24px;height:24px;fill:var(--ink)}
+
+  /* ---- Toggle grid ---- */
+  .toggle-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
+
+  .toggle{
+    position:relative;cursor:pointer;border-radius:26px;padding:26px 22px;
+    display:flex;flex-direction:column;align-items:center;gap:14px;
+    border:1px solid rgba(255,255,255,.65);
+    background:linear-gradient(150deg, rgba(255,255,255,.6), rgba(255,255,255,.32));
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    box-shadow:
+      inset 0 1px 0 var(--hl),
+      inset 0 -3px 8px rgba(255,255,255,.45),
+      inset 3px 0 8px rgba(255,255,255,.25),
+      0 10px 22px rgba(60,50,20,.14),
+      0 3px 7px rgba(60,50,20,.08);
+    transition:transform .2s cubic-bezier(.2,.8,.3,1.2), box-shadow .2s, background .2s;
+  }
+  .toggle::after{
+    content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+    background:linear-gradient(115deg, transparent 28%, rgba(255,255,255,.4) 46%, transparent 62%);
+  }
+  .toggle:hover{transform:translateY(-5px) scale(1.02);box-shadow:inset 0 1px 0 var(--hl), inset 0 -3px 8px rgba(255,255,255,.45), 0 16px 28px rgba(60,50,20,.18), 0 5px 10px rgba(60,50,20,.1)}
+  .toggle:active,.toggle.pressed{transform:translateY(3px) scale(.97);box-shadow:inset 0 4px 10px rgba(0,0,0,.16), 0 2px 4px rgba(60,50,20,.1)}
+  .toggle .icon{
+    width:74px;height:74px;border-radius:24px;position:relative;
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(145deg, rgba(255,255,255,.75), rgba(255,255,255,.4));
+    border:1px solid rgba(255,255,255,.7);
+    box-shadow:inset 0 1px 0 var(--hl), inset 0 -2px 5px rgba(255,255,255,.4), 0 4px 10px rgba(60,50,20,.12);
+  }
+  .toggle .icon svg{width:34px;height:34px;fill:var(--ink)}
+  .toggle .label{font-weight:700;font-size:.95rem;letter-spacing:.01em;position:relative;z-index:1}
+  .toggle .sub{font-size:.72rem;font-weight:600;opacity:.5;position:relative;z-index:1}
+
+  .toggle.on .icon{
+    border-color:rgba(255,255,255,.55);
+    box-shadow:inset 0 3px 8px rgba(0,0,0,.22), inset 0 -1px 3px rgba(255,255,255,.35), 0 4px 12px rgba(0,0,0,.22);
+  }
+  .toggle.on .icon svg{fill:#fff}
+  .toggle[data-accent="blue"].on{background:linear-gradient(150deg, rgba(57,73,171,.78), rgba(57,73,171,.5))}
+  .toggle[data-accent="teal"].on{background:linear-gradient(150deg, rgba(0,137,123,.78), rgba(0,137,123,.5))}
+  .toggle[data-accent="purple"].on{background:linear-gradient(150deg, rgba(69,66,140,.78), rgba(69,66,140,.5))}
+  .toggle[data-accent="orange"].on{background:linear-gradient(150deg, rgba(249,168,37,.82), rgba(249,168,37,.55))}
+  .toggle.on .label{color:#fff}
+  .toggle.on .sub{opacity:.7;color:#fff}
+
+  /* ---- Music player ---- */
+  .music{display:flex;align-items:center;gap:26px;padding:26px}
+  .artwork{
+    width:104px;height:104px;border-radius:24px;flex-shrink:0;position:relative;
+    background:linear-gradient(135deg, var(--purple), #7A6FB8 40%, var(--orange));
+    box-shadow:inset 0 2px 6px rgba(255,255,255,.5), inset 0 -4px 10px rgba(0,0,0,.25), 0 8px 18px rgba(60,50,20,.18);
+  }
+  .artwork::before{ /* inner glass pane reflection */
+    content:'';position:absolute;inset:8px;border-radius:18px;
+    background:linear-gradient(135deg, rgba(255,255,255,.4), transparent 55%);
+  }
+  .artwork::after{
+    content:'';position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+    width:26px;height:26px;border-radius:50%;
+    background:rgba(255,255,255,.5);
+    box-shadow:inset 0 2px 4px rgba(255,255,255,.8), 0 0 0 6px rgba(255,255,255,.18);
+  }
+  .music .meta{flex:1;min-width:0}
+  .music .meta h3{font-size:1.25rem;font-weight:800;letter-spacing:-.01em}
+  .music .meta p{font-size:.85rem;font-weight:600;opacity:.55;margin-top:3px}
+  .music .meta .eq{display:flex;gap:3px;margin-top:12px;height:18px;align-items:flex-end}
+  .music .meta .eq span{width:4px;border-radius:2px;background:var(--ink);opacity:.7;animation:eq 1s ease-in-out infinite alternate}
+  .music .meta .eq span:nth-child(1){height:40%;animation-delay:-.4s}
+  .music .meta .eq span:nth-child(2){height:90%;animation-delay:-.1s}
+  .music .meta .eq span:nth-child(3){height:60%;animation-delay:-.7s}
+  .music .meta .eq span:nth-child(4){height:100%;animation-delay:-.3s}
+  @keyframes eq{from{height:25%;opacity:.4}to{height:100%}}
+
+  .controls{display:flex;align-items:center;gap:16px;flex-shrink:0}
+  .cbtn{
+    width:54px;height:54px;border-radius:50%;cursor:pointer;
+    border:1px solid rgba(255,255,255,.7);
+    background:linear-gradient(145deg, rgba(255,255,255,.8), rgba(255,255,255,.4));
+    box-shadow:inset 0 1px 0 var(--hl), inset 0 -3px 6px rgba(255,255,255,.5), 0 6px 14px rgba(60,50,20,.14);
+    display:flex;align-items:center;justify-content:center;
+    transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .cbtn:hover{transform:translateY(-4px) scale(1.08);box-shadow:inset 0 1px 0 var(--hl), inset 0 -3px 6px rgba(255,255,255,.5), 0 12px 22px rgba(60,50,20,.18)}
+  .cbtn:active{transform:translateY(2px) scale(.94);box-shadow:inset 0 4px 8px rgba(0,0,0,.16), 0 2px 4px rgba(60,50,20,.1)}
+  .cbtn svg{width:26px;height:26px;fill:var(--ink)}
+  .cbtn.play{
+    width:64px;height:64px;background:linear-gradient(145deg, rgba(57,73,171,.9), rgba(57,73,171,.65));
+    border:1px solid rgba(255,255,255,.5);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.5), inset 0 -4px 8px rgba(0,0,0,.25), 0 8px 18px rgba(57,73,171,.35);
+  }
+  .cbtn.play svg{fill:#fff}
+  .cbtn.play:hover{transform:translateY(-4px) scale(1.06);box-shadow:inset 0 1px 0 rgba(255,255,255,.5), inset 0 -4px 8px rgba(0,0,0,.25), 0 14px 24px rgba(57,73,171,.45)}
+
+  /* ---- Circular row ---- */
+  .circle-row{display:flex;justify-content:space-between;gap:16px;padding:6px 4px}
+  .circle{
+    width:64px;height:64px;border-radius:50%;cursor:pointer;flex:0 1 64px;
+    border:1px solid rgba(255,255,255,.7);
+    background:linear-gradient(145deg, rgba(255,255,255,.75), rgba(255,255,255,.38));
+    box-shadow:inset 0 1px 0 var(--hl), inset 0 -3px 7px rgba(255,255,255,.5), inset 2px 0 6px rgba(255,255,255,.25), 0 8px 16px rgba(60,50,20,.13);
+    display:flex;align-items:center;justify-content:center;
+    transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .circle:hover{transform:translateY(-5px) scale(1.08);box-shadow:inset 0 1px 0 var(--hl), inset 0 -3px 7px rgba(255,255,255,.5), 0 14px 22px rgba(60,50,20,.18)}
+  .circle:active,.circle.pressed{transform:translateY(2px) scale(.94);box-shadow:inset 0 4px 9px rgba(0,0,0,.18), 0 2px 4px rgba(60,50,20,.1)}
+  .circle svg{width:28px;height:28px;fill:var(--ink)}
+  .circle.on{background:linear-gradient(145deg, rgba(69,66,140,.85), rgba(69,66,140,.6))}
+  .circle.on svg{fill:#fff}
+
+  /* ---- Bottom row ---- */
+  .bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+
+  .bright-card{padding:24px 26px;display:flex;gap:20px;align-items:stretch}
+  .bright-label{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;flex-shrink:0}
+  .bright-label svg{width:30px;height:30px;fill:var(--ink)}
+  .bright-label .pct{font-size:.8rem;font-weight:800;opacity:.6}
+
+  .slider-wrap{flex:1;display:flex;justify-content:center;position:relative;z-index:1}
+  input[type=range].vslider{
+    writing-mode:vertical-lr;direction:rtl;
+    -webkit-appearance:none;appearance:none;width:auto;height:100%;
+    min-height:120px;background:transparent;cursor:pointer;
+  }
+  .vslider::-webkit-slider-runnable-track{
+    width:18px;height:100%;
+    background:linear-gradient(180deg, rgba(255,255,255,.7), rgba(255,255,255,.35));
+    border:1px solid rgba(255,255,255,.7);
+    border-radius:12px;
+    box-shadow:inset 0 1px 0 var(--hl), inset 0 -3px 6px rgba(255,255,255,.45), inset 1px 0 4px rgba(0,0,0,.08);
+  }
+  .vslider::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;width:30px;height:30px;border-radius:50%;
+    background:linear-gradient(145deg, rgba(255,255,255,.95), rgba(255,255,255,.6));
+    border:1px solid rgba(255,255,255,.9);
+    box-shadow:inset 0 1px 0 #fff, 0 4px 10px rgba(60,50,20,.25);
+    margin:0 auto;
+  }
+  .vslider::-moz-range-track{
+    width:18px;height:100%;
+    background:linear-gradient(180deg, rgba(255,255,255,.7), rgba(255,255,255,.35));
+    border:1px solid rgba(255,255,255,.7);
+    border-radius:12px;
+    box-shadow:inset 0 1px 0 var(--hl), inset 0 -3px 6px rgba(255,255,255,.45);
+  }
+  .vslider::-moz-range-thumb{
+    width:28px;height:28px;border-radius:50%;
+    background:linear-gradient(145deg, rgba(255,255,255,.95), rgba(255,255,255,.6));
+    border:1px solid rgba(255,255,255,.9);
+    box-shadow:inset 0 1px 0 #fff, 0 4px 10px rgba(60,50,20,.25);
+  }
+  .vslider::-moz-range-progress{background:var(--orange);border-radius:12px}
+
+  .battery-card{padding:24px 26px;display:flex;flex-direction:column;justify-content:center;gap:14px;cursor:pointer}
+  .battery-card .btop{display:flex;align-items:center;gap:14px}
+  .battery-card .btext h4{font-size:1.05rem;font-weight:800}
+  .battery-card .btext p{font-size:.78rem;font-weight:600;opacity:.55;margin-top:2px}
+  .battery-card .hint{font-size:.68rem;font-weight:700;opacity:.45;letter-spacing:.04em;text-transform:uppercase}
+
+  .battery{
+    width:64px;height:34px;border-radius:9px;padding:3px;flex-shrink:0;
+    border:2px solid var(--ink);
+    position:relative;
+    box-shadow:inset 0 1px 3px rgba(0,0,0,.15);
+  }
+  .battery::before{
+    content:'';position:absolute;right:-7px;top:9px;width:5px;height:12px;
+    background:var(--ink);border-radius:2px;
+  }
+  .battery .fill{
+    height:100%;width:100%;border-radius:4px;
+    background:linear-gradient(180deg, #4CD1A6, var(--teal));
+    box-shadow:inset 0 1px 2px rgba(255,255,255,.6);
+    transition:width .3s ease, background .3s ease;
+  }
+  .battery.low .fill{background:linear-gradient(180deg, #FF8A80, var(--red))}
+  .battery.charging .fill{background:linear-gradient(180deg, #FFD54F, var(--orange))}
+
+  .pressed{transition-duration:.06s !important}
+
+  @media (max-width:640px){
+    body{padding:20px 12px}
+    .dashboard{padding:24px 18px;gap:20px}
+    .toggle-grid{gap:14px}
+    .toggle{padding:20px 14px}
+    .music{flex-direction:column;gap:18px;text-align:center}
+    .music .meta{display:flex;flex-direction:column;align-items:center}
+    .circle-row{justify-content:center}
+    .circle{flex:0 1 auto}
+    .bottom-row{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<div class="dashboard glass">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="titles">
+      <h1>Control Center</h1>
+      <p>Glass UI Demo</p>
+    </div>
+    <button class="icon-btn" id="settingsBtn" aria-label="Settings" title="Settings">
+      <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+    </button>
+  </header>
+
+  <!-- 2x2 toggle grid -->
+  <section class="toggle-grid">
+    <button class="toggle" data-accent="blue" aria-pressed="false">
+      <div class="icon"><svg viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>
+      <div>
+        <div class="label">Airplane</div>
+        <div class="sub">Off</div>
+      </div>
+    </button>
+    <button class="toggle" data-accent="teal" aria-pressed="false">
+      <div class="icon"><svg viewBox="0 0 24 24"><path d="M17.71 7.71 12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z"/></svg></div>
+      <div>
+        <div class="label">Bluetooth</div>
+        <div class="sub">Off</div>
+      </div>
+    </button>
+    <button class="toggle" data-accent="blue" aria-pressed="false">
+      <div class="icon"><svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.07 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg></div>
+      <div>
+        <div class="label">Wi-Fi</div>
+        <div class="sub">Off</div>
+      </div>
+    </button>
+    <button class="toggle" data-accent="orange" aria-pressed="false">
+      <div class="icon"><svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.96-.69 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.96.69-2.8L5.23 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg></div>
+      <div>
+        <div class="label">Sync</div>
+        <div class="sub">Off</div>
+      </div>
+    </button>
+  </section>
+
+  <!-- Music player -->
+  <section class="music glass">
+    <div class="artwork" aria-hidden="true"></div>
+    <div class="meta">
+      <h3>Dreams</h3>
+      <p>Unknown Artist</p>
+      <div class="eq"><span></span><span></span><span></span><span></span></div>
+    </div>
+    <div class="controls">
+      <button class="cbtn" id="prevBtn" aria-label="Previous">
+        <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+      </button>
+      <button class="cbtn play" id="playBtn" aria-label="Play" aria-pressed="false">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <button class="cbtn" id="nextBtn" aria-label="Next">
+        <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- Circular row -->
+  <section class="circle-row">
+    <button class="circle" data-on="lock" aria-label="Lock">
+      <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+    </button>
+    <button class="circle" data-on="notif" aria-label="Notifications">
+      <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+    </button>
+    <button class="circle" data-on="flash" aria-label="Flashlight">
+      <svg viewBox="0 0 24 24"><path d="M8 2h8v4H8zM18 8v2l-2 2v9a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-9l-2-2V8h12z"/></svg>
+    </button>
+    <button class="circle" data-on="calc" aria-label="Calculator">
+      <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM7 9V5h10v4H7zm2 10v-2h2v2H9zm0-4v-2h2v2H9zm4 4v-2h2v2h-2zm0-4v-2h2v2h-2zm0-4V9h2v2h-2zm4 4v-2h2v2h-2zm0-4V9h2v2h-2z"/></svg>
+    </button>
+    <button class="circle" data-on="cam" aria-label="Camera">
+      <svg viewBox="0 0 24 24"><path d="M12 15.2A3.2 3.2 0 1 0 12 8.8a3.2 3.2 0 0 0 0 6.4zM9 2 7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9z"/></svg>
+    </button>
+  </section>
+
+  <!-- Bottom row -->
+  <section class="bottom-row">
+    <div class="bright-card glass">
+      <div class="bright-label">
+        <svg viewBox="0 0 24 24"><path d="M20 15.31 23.31 12 20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69zM12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/></svg>
+        <span class="pct" id="brightPct">80%</span>
+      </div>
+      <div class="slider-wrap">
+        <input type="range" class="vslider" id="brightness" min="0" max="100" value="80" aria-label="Brightness">
+      </div>
+    </div>
+
+    <div class="battery-card glass" id="batteryCard" role="button" tabindex="0" aria-label="Battery">
+      <div class="btop">
+        <div class="battery" id="batteryIcon">
+          <div class="fill" id="batteryFill"></div>
+        </div>
+        <div class="btext">
+          <h4>Battery</h4>
+          <p id="batteryText">100% Charged</p>
+        </div>
+      </div>
+      <span class="hint" id="batteryHint">tap to cycle</span>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  const ICONS = {
+    play:  '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',
+    pause: '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'
+  };
+
+  // pressed / depressed 3D effect on every button
+  document.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('pointerdown', () => btn.classList.add('pressed'));
+    ['pointerup','pointerleave','pointercancel'].forEach(ev =>
+      btn.addEventListener(ev, () => btn.classList.remove('pressed')));
+  });
+
+  // toggle grid
+  document.querySelectorAll('.toggle').forEach(tgl => {
+    tgl.addEventListener('click', () => {
+      const on = tgl.classList.toggle('on');
+      tgl.setAttribute('aria-pressed', on);
+      tgl.querySelector('.sub').textContent = on ? 'On' : 'Off';
+    });
+  });
+
+  // circular row
+  document.querySelectorAll('.circle').forEach(c => {
+    c.addEventListener('click', () => c.classList.toggle('on'));
+  });
+
+  // settings button pulse
+  document.getElementById('settingsBtn').addEventListener('click', () => {
+    settingsBtn.classList.add('on');
+    setTimeout(() => settingsBtn.classList.remove('on'), 400);
+  });
+
+  // music player
+  const playBtn = document.getElementById('playBtn');
+  let playing = false;
+  playBtn.addEventListener('click', () => {
+    playing = !playing;
+    playBtn.querySelector('svg').outerHTML = ICONS[playing ? 'pause' : 'play'];
+    playBtn.setAttribute('aria-pressed', playing);
+  });
+  document.getElementById('prevBtn').addEventListener('click', () => playBtn.click());
+  document.getElementById('nextBtn').addEventListener('click', () => playBtn.click());
+
+  // brightness slider
+  const slider = document.getElementById('brightness');
+  const pct = document.getElementById('brightPct');
+  const updateBright = () => {
+    const v = slider.value;
+    pct.textContent = v + '%';
+    // orange fill on the track via a gradient overlay for webkit
+    slider.style.background =
+      'linear-gradient(to top, var(--orange) 0%, var(--orange) ' + v + '%, transparent ' + v + '%)';
+  };
+  slider.addEventListener('input', updateBright);
+  updateBright();
+
+  // battery cycling
+  const batteryIcon = document.getElementById('batteryIcon');
+  const batteryFill = document.getElementById('batteryFill');
+  const batteryText = document.getElementById('batteryText');
+  const batteryHint = document.getElementById('batteryHint');
+  const levels = [100, 75, 50, 25];
+  let levelIdx = 0;
+  const batteryNames = { 100:'100% Charged', 75:'75% Battery', 50:'50% Battery', 25:'25% Battery' };
+  const setBattery = (lvl) => {
+    batteryFill.style.width = lvl + '%';
+    batteryText.textContent = batteryNames[lvl];
+    batteryIcon.classList.toggle('low', lvl === 25);
+    batteryIcon.classList.toggle('charging', lvl === 75);
+  };
+  const cycleBattery = () => {
+    levelIdx = (levelIdx + 1) % levels.length;
+    setBattery(levels[levelIdx]);
+    batteryHint.textContent = levelIdx === 0 ? 'fully charged' : 'tap to cycle';
+  };
+  batteryCard.addEventListener('click', cycleBattery);
+  batteryCard.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); cycleBattery(); } });
+  setBattery(100);
+</script>
+</body>
+</html>
